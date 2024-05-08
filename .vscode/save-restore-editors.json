@@ -1,0 +1,27 @@
+{
+  "tabs": [
+    {
+      "name": "MCVD (18/04/2024)",
+      "tabGroups": [
+        {
+          "files": [
+            "file:///x%3A/nas-ctm01/homes/pfsousa/MCVD/runners/ncsn_runner.py",
+            "file:///x%3A/nas-ctm01/homes/pfsousa/MCVD/cfg_V1_sample.sh",
+            "file:///x%3A/nas-ctm01/homes/pfsousa/MCVD/configs/cfg_V1.yml",
+            "file:///x%3A/nas-ctm01/homes/pfsousa/metabreast/logs/mcvd/V1/output_sample.out",
+            "file:///x%3A/nas-ctm01/homes/pfsousa/metabreast/logs/mcvd/V1/error_sample.out"
+          ],
+          "viewColumn": 1
+        }
+      ],
+      "layout": {
+        "orientation": 1,
+        "groups": [
+          {
+            "size": 975
+          }
+        ]
+      }
+    }
+  ]
+}

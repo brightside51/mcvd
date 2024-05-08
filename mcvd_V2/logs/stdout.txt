@@ -1,0 +1,21 @@
+INFO - main.py - 2024-05-08 15:44:00,573 - Using device: cuda
+INFO - main.py - 2024-05-08 15:44:00,578 - Namespace(config='configs/cfg_V2.yml', data_path='../../../datasets/private/LUCAS/lidc/TCIA_LIDC-IDRI_20200921/LIDC-IDRI/video_data', seed=1234, exp='mcvd_V2', comment='', verbose='info', resume_training=False, test=False, feats_dir='/nas-ctm01/homes/pfsousa/MCVD/datasets', stats_dir='/nas-ctm01/homes/pfsousa/MCVD/datasets', stats_download=False, fast_fid=False, fid_batch_size=1000, no_pr=False, fid_num_samples=None, pr_nn_k=None, sample=False, image_folder='images', final_only=None, end_ckpt=None, freq=None, no_ema=False, ni=True, interact=False, video_gen=False, video_folder='videos', subsample=None, ckpt=None, config_mod=[], start_at=0, command='python main.py --config configs/cfg_V2.yml --data_path ../../../datasets/private/LUCAS/lidc/TCIA_LIDC-IDRI_20200921/LIDC-IDRI/video_data --exp mcvd_V2 --ni', log_path='mcvd_V2/logs')
+INFO - main.py - 2024-05-08 15:44:00,578 - Writing log file to mcvd_V2/logs
+INFO - main.py - 2024-05-08 15:44:00,578 - Exp instance id = 9551
+INFO - main.py - 2024-05-08 15:44:00,578 - Exp comment = 
+INFO - main.py - 2024-05-08 15:44:00,578 - Config =
+INFO - main.py - 2024-05-08 15:44:00,586 - Args =
+INFO - ncsn_runner.py - 2024-05-08 15:44:02,324 - Number of parameters: 27967710
+INFO - ncsn_runner.py - 2024-05-08 15:44:02,326 - Number of trainable parameters: 27967710
+INFO - ncsn_runner.py - 2024-05-08 15:44:02,328 - Number of GPUs : 1
+INFO - ncsn_runner.py - 2024-05-08 15:44:02,328 - _CudaDeviceProperties(name='NVIDIA GeForce GTX 1080', major=6, minor=1, total_memory=8113MB, multi_processor_count=20)
+INFO - ncsn_runner.py - 2024-05-08 15:44:05,674 - elapsed: 0:00:03.325, train time: 0.0009, mem: 1.261GB, GPUmem: 0.815GB, step: 1, lr: 0.000000, grad: 16548.4551, loss: 61281.3633
+ERROR - main.py - 2024-05-08 15:44:06,537 - Traceback (most recent call last):
+  File "/nas-ctm01/homes/pfsousa/MCVD/main.py", line 404, in main
+    runner.train()
+  File "/nas-ctm01/homes/pfsousa/MCVD/runners/ncsn_runner.py", line 457, in train
+    test_X, test_y = next(test_iter)
+    ^^^^^^^^^^^^^^
+ValueError: not enough values to unpack (expected 2, got 1)
+
+INFO - main.py - 2024-05-08 15:44:06,571 - 2024-05-08 15:44:06

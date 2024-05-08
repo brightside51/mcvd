@@ -1,4 +1,6 @@
 import numpy as np
+import sys
+import argparse
 import os
 import torch
 import torchvision.transforms as transforms
@@ -14,11 +16,143 @@ from datasets.bair import BAIRDataset
 from datasets.kth import KTHDataset
 from datasets.cityscapes import CityscapesDataset
 from datasets.ucf101 import UCF101Dataset
-from torch.utils.data import Subset
+#sys.path.append("../../MetaBreast/data/non_cond")
+from datasets.nc_data_reader import NCDataset
+#from datasets.metabreast.nc_data_reader import NCDataset
+from torch.utils.data import Subset, ConcatDataset
 
+DATASETS = ['CIFAR10', 'CELEBA', 'LSUN', 'FFHQ', 'IMAGENET', 'MOVINGMNIST', 'STOCHASTICMOVINGMNIST', 'BAIR', 'KTH', 'CITYSCAPES', 'UCF101', 'METABREAST']
 
-DATASETS = ['CIFAR10', 'CELEBA', 'LSUN', 'FFHQ', 'IMAGENET', 'MOVINGMNIST', 'STOCHASTICMOVINGMNIST', 'BAIR', 'KTH', 'CITYSCAPES', 'UCF101']
+# ============================================================================================
 
+# Non-Conditional 3D Diffusion Model Parser Initialization
+if True:
+    ncdiff_parser = argparse.ArgumentParser(
+        description = "Non-Conditional 3D Diffusion Model")
+    ncdiff_parser.add_argument('--model_type', type = str,            # Chosen Model / Diffusion
+                                choices =  {'video_diffusion',
+                                            'blackout_diffusion',
+                                            'mcvd', 'ramvid'},
+                                default = 'mcvd')
+    ncdiff_parser.add_argument('--model_version', type = int,         # Model Version Index
+                                default = 2)
+    ncdiff_parser.add_argument('--data_version', type = int,          # Dataset Version Index
+                                default = 2)
+    settings = ncdiff_parser.parse_args("")
+
+    # ============================================================================================
+
+    # Directories and Path Arguments
+    ncdiff_parser.add_argument('--reader_folderpath', type = str,         # Path for Dataset Reader Directory
+                                default = '../MetaBreast/data/non_cond')
+    ncdiff_parser.add_argument('--public_data_folderpath', type = str,    # Path for Private Dataset Directory
+                                #default = "X:/nas-ctm01/datasets/public/MEDICAL/Duke-Breast-Cancer-T1")
+                                default = "../../../datasets/public/MEDICAL/Duke-Breast-Cancer-T1")
+    ncdiff_parser.add_argument('--private_data_folderpath', type = str,   # Path for Private Dataset Directory
+                                #default = "X:/nas-ctm01/datasets/private/METABREST/T1W_Breast")
+                                default = '../../../datasets/private/METABREST/T1W_Breast')
+    ncdiff_parser.add_argument( '--lung_data_folderpath', type = str,     # Path for LUCAS Dataset Directory
+                                #default = "X:/nas-ctm01/datasets/private/LUCAS/lidc/TCIA_LIDC-IDRI_20200921/LIDC-IDRI")
+                                default = "../../../datasets/private/LUCAS/lidc/TCIA_LIDC-IDRI_20200921/LIDC-IDRI")
+
+    # Directory | Model-Related Path Arguments
+    ncdiff_parser.add_argument('--model_folderpath', type = str,          # Path for Model Architecture Directory
+                                default = f'../../models/{settings.model_type}')
+    ncdiff_parser.add_argument('--script_folderpath', type = str,         # Path for Model Training & Testing Scripts Directory
+                                default = f'../../scripts/{settings.model_type}')
+    ncdiff_parser.add_argument('--logs_folderpath', type = str,           # Path for Model Saving Directory
+                                default = f'../../logs/{settings.model_type}')
+    ncdiff_parser.add_argument('--verbose', type = bool,                  # Verbose Control Variable
+                                default = False)
+        
+    # ============================================================================================
+
+    # Dataset | Dataset General Arguments
+    ncdiff_parser.add_argument('--data_format', type = str,           # Chosen Dataset Format for Reading
+                                choices =  {'mp4', 'dicom'},
+                                default = 'mp4')
+    ncdiff_parser.add_argument('--img_size', type = int,              # Generated Image Resolution
+                                default = 64)
+    ncdiff_parser.add_argument('--num_slice', type = int,             # Number of 2D Slices in MRI
+                                default = 30)
+    ncdiff_parser.add_argument('--slice_spacing', type = bool,        # Usage of Linspace for Slice Spacing
+                                default = False)
+    ncdiff_parser.add_argument('--slice_bottom_margin', type = int,   # Number of 2D Slices to be Discarded in Bottom Margin
+                                default = 5)
+    ncdiff_parser.add_argument('--slice_top_margin', type = int,      # Number of 2D Slices to be Discarded in Top Margin
+                                default = 15)
+    ncdiff_parser.add_argument('--data_prep', type = bool,            # Usage of Dataset Pre-Processing Control Value
+                                default = True)
+    ncdiff_parser.add_argument('--h_flip', type = int,                # Percentage of Horizontally Flipped Subjects
+                                default = 50)
+
+    # Dataset | Dataset Splitting Arguments
+    ncdiff_parser.add_argument('--train_subj', type = int,            # Number of Random Subjects in Training Set
+                                default = 0)                          # PS: Input 0 for all Subjects in the Dataset
+    ncdiff_parser.add_argument('--val_subj', type = int,              # Number of Random Subjects in Validation Set
+                                default = 0)
+    ncdiff_parser.add_argument('--test_subj', type = int,             # Number of Random Subjects in Test Set
+                                default = 10)
+
+    # Dataset | DataLoader Arguments
+    ncdiff_parser.add_argument('--batch_size', type = int,            # DataLoader Batch Size Value
+                                default = 1)
+    ncdiff_parser.add_argument('--num_fps', type = int,               # Number of Video Frames per Second
+                                default = 4)
+    ncdiff_parser.add_argument('--shuffle', type = bool,              # DataLoader Subject Shuffling Control Value
+                                default = True)
+    ncdiff_parser.add_argument('--num_workers', type = int,           # Number of DataLoader Workers
+                                default = 8)
+    ncdiff_parser.add_argument('--prefetch_factor', type = int,       # Number of Prefetched DataLoader Batches per Worker
+                                default = 1)
+
+    # ============================================================================================
+
+    # Model | Architecture-Defining Arguments
+    ncdiff_parser.add_argument('--seed', type = int,                  # Randomised Generational Seed
+                                default = 0)
+    ncdiff_parser.add_argument('--dim', type = int,                   # Input Dimensionality (Not Necessary)
+                                default = 64)
+    ncdiff_parser.add_argument('--num_channel', type = int,           # Number of Input Channels for Dataset
+                                default = 1)
+    ncdiff_parser.add_argument('--mult_dim', type = tuple,            # Dimensionality for all Conditional Layers
+                                default = (1, 2, 4, 8))
+
+    # Model | Training & Diffusion Arguments
+    ncdiff_parser.add_argument('--noise_type', type = str,            # Diffusion Noise Distribution
+                                default = 'gaussian')
+    #ncdiff_parser.add_argument('--num_epochs', type = int,           # Number of Training Epochs
+    #                            default = 30)
+    ncdiff_parser.add_argument('--num_ts', type = int,                # Number of Scheduler Timesteps
+                                default = 500)
+    ncdiff_parser.add_argument('--num_steps', type = int,             # Number of Diffusion Training Steps
+                                default = 150000)
+    ncdiff_parser.add_argument('--lr_base', type = float,             # Base Learning Rate Value
+                                default = 1e-4)
+    ncdiff_parser.add_argument('--lr_decay', type = float,            # Learning Rate Decay Value
+                                default = 0.999)
+    ncdiff_parser.add_argument('--lr_step', type = float,             # Number of Steps inbetween Learning Rate Decay
+                                default = 250)
+    ncdiff_parser.add_argument('--lr_min', type = float,              # Minimum Decayed Learning Rate Value
+                                default = 1e-6)
+    
+    # Model | Result Logging Arguments 
+    ncdiff_parser.add_argument('--save_interval', type = int,         # Number of Training Step Interval inbetween Image Saving
+                                default = 500)
+    #ncdiff_parser.add_argument('--log_interval', type = int,          # Number of Training Step Interval inbetween Result Logging (not a joke i swear...)
+    #                           default = 1)
+    ncdiff_parser.add_argument('--save_img', type = int,              # Square Root of Number of Images Saved for Manual Evaluation
+                                default = 2)
+    ncdiff_parser.add_argument('--log_method', type = str,            # Metric Logging Methodology
+                                choices = {'wandb', 'tensorboard', None},
+                                default = 'tensorboard')
+
+    # ============================================================================================
+
+    settings = ncdiff_parser.parse_args("")
+    settings.device = torch.device('cuda:0' if torch.cuda.is_available() else "cpu")
+
+# ============================================================================================
 
 def get_dataloaders(data_path, config):
     dataset, test_dataset = get_dataset(data_path, config)
@@ -55,6 +189,16 @@ def get_dataset(data_path, config, video_frames_pred=0, start_at=0):
                           transform=tran_transform)
         test_dataset = CIFAR10(data_path, train=False, download=True,
                                transform=test_transform)
+        
+    elif config.data.dataset.upper() == 'METABREAST':
+
+        dataset = NCDataset(    settings,
+                                mode = 'train',
+                                dataset = 'lung')
+
+        test_dataset = NCDataset(   settings,
+                                    mode = 'test',
+                                    dataset = 'lung')
 
     elif config.data.dataset.upper() == 'CELEBA':
         if config.data.random_flip:

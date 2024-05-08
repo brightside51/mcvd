@@ -369,7 +369,7 @@ class NCSNRunner():
 
         early_end = False
         for epoch in range(start_epoch, self.config.training.n_epochs):
-            for batch, (X, y) in enumerate(dataloader):
+            for batch, X in enumerate(dataloader):
 
                 optimizer.zero_grad()
                 lr = warmup_lr(optimizer, step, getattr(self.config.optim, 'warmup', 0), self.config.optim.lr)
@@ -385,6 +385,8 @@ class NCSNRunner():
                                                      conditional=conditional)
 
                 # Loss
+                print(X.shape)
+                if cond is not None: print(cond.shape)
                 itr_start = time.time()
                 loss = anneal_dsm_score_estimation(scorenet, X, labels=None, cond=cond, cond_mask=cond_mask,
                                                    loss_type=getattr(self.config.training, 'loss_type', 'a'),
@@ -455,7 +457,7 @@ class NCSNRunner():
                         test_X, test_y = next(test_iter)
                     except StopIteration:
                         test_iter = iter(test_loader)
-                        test_X, test_y = next(test_iter)
+                        test_X = next(test_iter)
 
                     test_X = test_X.to(self.config.device)
                     test_X = data_transform(self.config, test_X)
@@ -689,7 +691,9 @@ class NCSNRunner():
 
                     else:
                         # Stretch out multiple frames horizontally
+                        print(pred.shape)
                         pred = stretch_image(pred, self.config.data.channels, self.config.data.image_size)
+                        print(pred.shape)
                         nrow = ceil(np.sqrt(n_init_samples))
                         image_grid = make_grid(pred, nrow)
 
