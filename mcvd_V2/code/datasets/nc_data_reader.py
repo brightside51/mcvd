@@ -194,5 +194,5 @@ class NCDataset(Dataset):
         else: raise(NotImplementedError)
         return img_data.unsqueeze(0)
         #, np.array(img_data.unsqueeze(0) >= 0.5, dtype=float)
-        #3return torch.vstack((img_data[0, :, :], img_data)).unsqueeze(0)
+        #return torch.vstack((img_data[0, :, :], img_data)).unsqueeze(0)
     

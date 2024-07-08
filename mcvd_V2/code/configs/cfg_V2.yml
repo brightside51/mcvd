@@ -101,7 +101,7 @@ model:
     - 16
     - 32 # can use only 16 for traditional
   n_head_channels: 64 # -1 for traditional
-  conditional: true
+  conditional: false
   noise_in_cond: false
   output_all_frames: false # could be useful especially for 3d models
   cond_emb: false

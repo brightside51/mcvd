@@ -1,0 +1,40 @@
+ckpt: 105000
+command: python main.py --config configs/cfg_V1.yml --data_path ../../../datasets/private/METABREST/T1W_Breast/video_data
+  --exp mcvd_V1 --ni --config_mod sampling.max_data_iter=1000 sampling.num_frames_pred=29
+  sampling.preds_per_test=10 sampling.subsample=100 model.version=DDPM --ckpt 105000
+  --video_gen -v mcvd_V1_100k
+comment: ''
+config: configs/cfg_V1.yml
+config_mod:
+- sampling.max_data_iter=1000
+- sampling.num_frames_pred=29
+- sampling.preds_per_test=10
+- sampling.subsample=100
+- model.version=DDPM
+data_path: ../../../datasets/private/METABREST/T1W_Breast/video_data
+end_ckpt: null
+exp: mcvd_V1
+fast_fid: false
+feats_dir: /nas-ctm01/homes/pfsousa/MCVD/datasets
+fid_batch_size: 1000
+fid_num_samples: null
+final_only: true
+freq: null
+image_folder: images
+interact: false
+log_path: mcvd_V1/logs
+ni: true
+no_ema: false
+no_pr: false
+pr_nn_k: null
+resume_training: false
+sample: false
+seed: 1234
+start_at: 0
+stats_dir: /nas-ctm01/homes/pfsousa/MCVD/datasets
+stats_download: false
+subsample: null
+test: false
+verbose: info
+video_folder: mcvd_V1/video_samples/mcvd_V1_100k
+video_gen: true

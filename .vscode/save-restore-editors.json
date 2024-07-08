@@ -22,6 +22,30 @@
           }
         ]
       }
+    },
+    {
+      "name": "19/05/2024",
+      "tabGroups": [
+        {
+          "files": [
+            "file:///x%3A/nas-ctm01/homes/pfsousa/MCVD/runners/ncsn_runner.py",
+            "file:///x%3A/nas-ctm01/homes/pfsousa/MCVD/datasets/__init__.py",
+            "file:///x%3A/nas-ctm01/homes/pfsousa/metabreast/logs/mcvd/V3/error.out",
+            "file:///x%3A/nas-ctm01/homes/pfsousa/metabreast/logs/mcvd/V3/output.out",
+            "file:///x%3A/nas-ctm01/homes/pfsousa/MCVD/cfg_V3.sh",
+            "file:///x%3A/nas-ctm01/homes/pfsousa/MCVD/configs/cfg_V3.yml"
+          ],
+          "viewColumn": 1
+        }
+      ],
+      "layout": {
+        "orientation": 1,
+        "groups": [
+          {
+            "size": 615
+          }
+        ]
+      }
     }
   ]
 }
